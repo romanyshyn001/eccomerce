@@ -35,6 +35,7 @@ function Categories({ swal }) {
         values: p.values.split(","),
       })),
     };
+    // console.log('data =>', data)
     if (editedCategory) {
       data._id = editedCategory._id;
       await axios.put("/api/categories", data);

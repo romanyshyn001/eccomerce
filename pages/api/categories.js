@@ -15,12 +15,13 @@ export default async function handle(req, res) {
 
   if (method === "POST") {
     const { name, parentCategory, properties } = req.body;
+    // console.log('typeof',typeof(properties))
     const categoryDoc = await Category.create({
       name,
       parent: parentCategory || undefined,
       properties: properties.map((p) => ({
         name: p.name,
-        values: p.values.split(","),
+        values: p.values //.split(","),
       })),
     });
     res.json(categoryDoc);

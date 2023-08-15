@@ -26,93 +26,156 @@ export default function ProductForm({
     assignProperties || {}
   );
 
-  async function saveProduct(ev) {
-    ev.preventDefault();
-    const data = {
-      title,
-      description,
-      price,
-      images,
-      category,
-      properties: productProperties,
-    };
-    // console.log(data, "<=data");
-    if (_id) {
-      // console.log({ ...data, _id });
-      await axios.put("/api/products", { ...data, _id });
-      //   await axios.put("/api/products", { ...data, _id });
-    } else {
-      await axios.post("/api/products", data);
-    }
-    setGoToProducts(true);
-    // console.log(images);
-  }
+//   async function saveProduct(ev) {
+//     ev.preventDefault();
+//     const data = {
+//       title,
+//       description,
+//       price,
+//       images,
+//       category,
+//       properties: productProperties,
+//     };
+//     // console.log(data, "<=data");
+//     if (_id) {
+//       // console.log({ ...data, _id });
+//       await axios.put("/api/products", { ...data, _id });
+//       //   await axios.put("/api/products", { ...data, _id });
+//     } else {
+//       await axios.post("/api/products", data);
+//     }
+//     setGoToProducts(true);
+//     // console.log(images);
+//   }
 
-  if (goToProducts) {
-    router.push("/products");
-  }
-
-  async function uploadImages(ev) {
+//   if (goToProducts) {
+//     router.push("/products");
+//   }
+// //working here
+//   async function uploadImages(ev) {
     
-    const files = ev.target?.files;
-    if (files?.length > 0) {
-      setIsUploading(true);
-      const data = new FormData();
-      for (const file of files) {
-        data.append("file", file);
-      }
+//     const files = ev.target?.files;
+//     console.log('files images=>',files);
+//     if (files?.length > 0) {
+//       setIsUploading(true);
+//       const data = new FormData();
+//       for (const file of files) {
+//         data.append("file", file);
+//       }
 
-      const res = await axios.post("/api/upload", data, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      // console.log("images", res, images);
-      setImages((oldImages) => {
-        return [...oldImages, ...res.data.links];
-      });
-      // console.log(images);
+//       const res = await axios.post("/api/upload", data, {
+//         headers: {
+//           "Content-Type": "multipart/form-data",
+//         },
+//       });
+//       // console.log("images", res, images);
+//       setImages((oldImages) => {
+//         return [...oldImages, ...res.data.links];
+//       });
+//       // console.log(images);
+//     }
+//     setIsUploading(false);
+//   }
+
+//   function updateImagesOrder(images) {
+//     setImages(images);
+//   }
+
+//   useEffect(() => {
+//     axios.get("/api/categories").then((result) => setCategories(result.data));
+//   }, []);
+
+//   const propertiesToFill = [];
+//   if (categories.length > 0 && category) {
+//     let catInfo = categories.find(({ _id }) => _id === category);
+//     // console.log("catInfo => ", catInfo);
+//     // console.log('catInfo =>', catInfo``)
+//     propertiesToFill.push(...catInfo.properties);
+//     while (catInfo?.parent?._id) {
+//       const parentCat = categories.find(
+//         ({ _id }) => _id === catInfo?.parent?._id
+//       );
+//       propertiesToFill.push(...parentCat.properties);
+//       catInfo = parentCat;
+//     }
+//   }
+//   function setProductProp(propName, value) {
+//     setProductProperties((prev) => {
+//       const newProductProps = { ...prev };
+//       newProductProps[propName] = value;
+//       // console.log(
+//       //   "newProductProps=>",
+//       //   newProductProps,
+//       //   "propName =>",
+//       //   propName,
+//       //   "value =>",
+//       //   value
+//       // );
+//       return newProductProps;
+//     });
+//   }
+useEffect(() => {
+  axios.get('/api/categories').then(result => {
+    setCategories(result.data);
+  })
+}, []);
+async function saveProduct(ev) {
+  ev.preventDefault();
+  const data = {
+    title,description,price,images,category,
+    properties:productProperties
+  };
+  if (_id) {
+    //update
+    await axios.put('/api/products', {...data,_id});
+  } else {
+    //create
+    await axios.post('/api/products', data);
+  }
+  setGoToProducts(true);
+}
+if (goToProducts) {
+  router.push('/products');
+}
+async function uploadImages(ev) {
+  const files = ev.target?.files;
+  if (files?.length > 0) {
+    setIsUploading(true);
+    const data = new FormData();
+    for (const file of files) {
+      data.append('file', file);
     }
+    const res = await axios.post('/api/upload', data, {headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+    setImages(oldImages => {
+      return [...oldImages, ...res.data.links];
+    });
     setIsUploading(false);
   }
+}
+function updateImagesOrder(images) {
+  setImages(images);
+}
+function setProductProp(propName,value) {
+  setProductProperties(prev => {
+    const newProductProps = {...prev};
+    newProductProps[propName] = value;
+    return newProductProps;
+  });
+}
 
-  function updateImagesOrder(images) {
-    setImages(images);
+const propertiesToFill = [];
+if (categories.length > 0 && category) {
+  let catInfo = categories.find(({_id}) => _id === category);
+  propertiesToFill.push(...catInfo.properties);
+  while(catInfo?.parent?._id) {
+    const parentCat = categories.find(({_id}) => _id === catInfo?.parent?._id);
+    propertiesToFill.push(...parentCat.properties);
+    catInfo = parentCat;
   }
-
-  useEffect(() => {
-    axios.get("/api/categories").then((result) => setCategories(result.data));
-  }, []);
-
-  const propertiesToFill = [];
-  if (categories.length > 0 && category) {
-    let catInfo = categories.find(({ _id }) => _id === category);
-    // console.log("catInfo => ", catInfo);
-    propertiesToFill.push(...catInfo.properties);
-    while (catInfo?.parent?._id) {
-      const parentCat = categories.find(
-        ({ _id }) => _id === catInfo?.parent?._id
-      );
-      propertiesToFill.push(...parentCat.properties);
-      catInfo = parentCat;
-    }
-  }
-  function setProductProp(propName, value) {
-    setProductProperties((prev) => {
-      const newProductProps = { ...prev };
-      newProductProps[propName] = value;
-      console.log(
-        "newProductProps=>",
-        newProductProps,
-        "propName =>",
-        propName,
-        "value =>",
-        value
-      );
-      return newProductProps;
-    });
-  }
-
+}
   return (
     <form onSubmit={saveProduct}>
       <label> Product name</label>
