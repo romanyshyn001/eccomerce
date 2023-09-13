@@ -16,7 +16,7 @@ export default function Home() {
           Hello : <b> {session?.user?.name}</b>
         </h1>
         <div className="flex bg-gray-300 gap 1 text-black rounded-lg overflow-hidden">
-          <Image src={session?.user?.image} alt="photo" className="w-6 h-6" />
+          {/* <Image src={session?.user?.image} alt="photo" className="w-6 h-6" /> */}
           <span className=" px-2"> </span>
           {session?.user?.name}
         </div>
